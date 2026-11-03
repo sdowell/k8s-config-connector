@@ -76,6 +76,9 @@ This skill guides an automated agent through the process of implementing a round
      ```
    - Ensure the test suite completes successfully. If any fields fail round-tripping, examine the `<hint_for_agent>` in the test output to identify which fields need to be registered or marked as unimplemented.
 
+6. **Journal**
+   - Follow `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, service-specific notes in `.gemini/journals/<service_name>.md`.
+
 ## Creating a Fuzzer for No-Proto (OpenAPI) Resources
 
 When a direct controller manages a resource that does not have a proto schema (e.g., OpenAPI-based or Discovery API-based resources such as DNS ManagedZone), use the NoProto KRM Fuzzer framework and automatic OpenAPI mapper generation.

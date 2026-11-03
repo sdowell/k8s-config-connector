@@ -24,6 +24,13 @@ Use this workflow for **Greenfield Step 1** when `apis/<service>/<version>/<kind
 
 ## Workflow
 
+### Phase 0: Check That `<Kind>` Isn't Already Prepopulated
+Your checkout is the latest `master`, so search it:
+```bash
+grep -n "kind: <Kind>$" apis/*/judgement_queue.yaml
+```
+If that finds `<Kind>`, **don't change anything**: make no commit, and reply that `<Kind>` is already prepopulated (naming the file). A maintainer will close the issue, and the graph's next step (Step 1b) triages it.
+
 ### Phase 1: Proto Discovery & GA Verification
 1. Ensure `.build/third_party/googleapis` is populated (run `./dev/tools/controllerbuilder/generate-proto.sh` if missing).
 2. Locate the target proto message in `.build/third_party/googleapis/google/...` and confirm it belongs to a **GA** proto package (e.g., `v1`, `v2`, `v4` — not `v1alpha*` or `v1beta*`).

@@ -12,6 +12,9 @@ This skill guides the implementation of the `Adapter` interface
 - `service_name`: The GCP service name (short, e.g., `apigee`).
 - `api_version`: The KCC API version.
 
+## Prerequisites
+Also read and apply [`kcc-direct-controller-implementer`](.gemini/skills/kcc-direct-controller-implementer/SKILL.md) for the general controller, mapper and package rules. Where the two disagree (e.g. how the Adapter stores `desired`), this brownfield skill wins.
+
 ## Workflow
 
 1.  **Implement Adapter Logic**:
@@ -93,5 +96,6 @@ This skill guides the implementation of the `Adapter` interface
 
       Run comparison/recording commands again after making updates to verify if the changes resolve the issues. Repeat until the tests pass and the updated golden files and HTTP logs accurately match expectations.
 
-## Journaling
-Append any reconciliation alignment issues to `.gemini/journals/<service>.md` using the format described in the `kcc-agentic-journaler` skill.
+## Before Opening the PR
+1. Document the `hack/record-gcp` run in the PR description as described in "PR Reporting" of [`record-real-gcp`](.gemini/skills/record-real-gcp/SKILL.md).
+2. Journal per `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, and reconciliation alignment issues and other service-specific notes in `.gemini/journals/<service>.md`.

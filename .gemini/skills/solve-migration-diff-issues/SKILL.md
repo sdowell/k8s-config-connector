@@ -30,6 +30,12 @@ The migration test (`TestMigrationToDirect` in `tests/e2e/migration_test.go`) ex
 
 ---
 
+## Which Fixtures to Validate
+
+Find the tests for `<Kind>` under `pkg/test/resourcefixture/testdata/basic/`. Include only those whose `create.yaml` does **not** set the annotation `alpha.cnrm.cloud.google.com/reconciler: direct` (those start on the legacy controller, so they exercise the takeover). Run the 4-Step Development Sequence below for each of them, re-recording against live GCP with `./hack/record-gcp TestMigrationToDirect/fixtures/<fixture-name>$` so the recorded traffic reflects the direct controller. Do NOT rely solely on MockGCP.
+
+---
+
 ## The 4-Step Development Sequence (How to Fix Issues)
 
 ### Step 0: Remove from Ratcheting Exclusions (MANDATORY Make-up)
@@ -57,7 +63,7 @@ Before writing any code or making any changes, you must diagnose the behavior ag
 
    *Note on external dependencies:* If the fixture references external pre-existing GCP resources (e.g., secrets in Secret Manager or KMS keys via `external: projects/${projectId}/...`), verify that these dependencies exist in the target GCP project before running `./hack/record-gcp`.
 
-   *Note on Allowlist-Gated Services & Credential Restrictions:* If live GCP API calls fail because a service is allowlist-gated (e.g., Media CDN / Edge Cache returning `404 Method not found`), requires human end-user credentials (e.g., OS Login `403 End user credentials must match`), or requires unavailable project permissions, document the specific command, full error message, and root cause in the PR description and a journal file under `.gemini/skills/solve-migration-diff-issues/journal/<kind>.md`. Fall back to validating migration hermetically against MockGCP, and do not check in mock-generated migration logs as real GCP golden logs.
+   *Note on Allowlist-Gated Services & Credential Restrictions:* If live GCP API calls fail because a service is allowlist-gated (e.g., Media CDN / Edge Cache returning `404 Method not found`), requires human end-user credentials (e.g., OS Login `403 End user credentials must match`), or requires unavailable project permissions, document the specific command, full error message, and root cause in the PR description and in `.gemini/journals/<service>.md` (per `kcc-agentic-journaler`). Fall back to validating migration hermetically against MockGCP, and do not check in mock-generated migration logs as real GCP golden logs.
 
 2. Open the recorded structured diff file:
    `pkg/test/resourcefixture/testdata/basic/<service>/<version>/<resource>/<fixture-name>/_migration_diffs.json`
@@ -116,3 +122,7 @@ Using the diff produced in Step 1, identify why the Direct controller sees a dif
    rm -f pkg/test/resourcefixture/testdata/basic/<service>/v1beta1/<resource>/*/_http_migration_phase*.log
    rm -f pkg/test/resourcefixture/testdata/basic/<service>/v1beta1/<resource>/*/_migration_diffs.json
    ```
+
+## Step 6: Before Opening the PR
+1. Document the `./hack/record-gcp` runs in the PR description as described in "PR Reporting" of [`record-real-gcp`](.gemini/skills/record-real-gcp/SKILL.md).
+2. Journal per `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, service-specific notes in `.gemini/journals/<service>.md`.

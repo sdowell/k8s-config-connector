@@ -45,6 +45,10 @@ ${CONTROLLERBUILDER} generate-identity \
 
 When asked to update or create the identity and reference for a "resource of the day" (e.g., `group: memorystore.cnrm.cloud.google.com`, `kind: MemoryStoreInstance`), follow these steps:
 
+### Step 0: Check Whether the Kind Already Follows the Pattern (`step/identity` issues only)
+
+If your issue is labeled `step/identity` (the brownfield graph's "Move `<Kind>` to identity and refs pattern" step) and `<Kind>` already has `_identity.go` and `_reference.go` implementing `identity.IdentityV2` and `refs.Ref` using `gcpurls.Template`, **do not open a PR**: comment on the issue that `<Kind>` already follows the pattern (naming the files), and close the issue as **not planned**. The graph treats that as Skipped and moves on to the next step.
+
 ### Step 1: Locate the target files
 
 1. Identify the `groupPrefix` (the group without the `.cnrm.cloud.google.com` suffix). Example: `memorystore`
@@ -134,3 +138,5 @@ Create or update the file to match the canonical example. Key requirements:
 2. **Run Compilations and Linters**:
    - Ensure the code compiles and there are no lint errors. You MUST always run `go vet ./...` and `go build ./...` before sending the PR to verify that your changes have not introduced any compilation errors across the entire project.
    - If any CRDs, schemas, or reference definitions changed, always run `make resource-docs` to regenerate the resource documentation and prevent doc validation pipeline breakages.
+
+3. **Journal**: per `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, service-specific notes in `.gemini/journals/<service_name>.md`.

@@ -23,3 +23,13 @@ grep -rn "RegisterModel(.*<Kind>GVK" pkg/controller/direct/<service>/ 2>/dev/nul
 - **If a controller file for `<Kind>` already exists on the branch and does NOT contain `// +generated:controller` (In-Flight Legacy Handwritten Controller PR)**:
   - Read and follow **[`.gemini/skills/kcc-direct-controller-logic-greenfield-implementer/legacy/SKILL.md`](legacy/SKILL.md)** using `view_file`.
 
+## Before Opening the PR
+
+1. Journal per `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, service-specific notes in `.gemini/journals/<service_name>.md`.
+2. Include the release note block set to NONE in the PR description (the graph's final Release step adds the new-resource note):
+   ````
+   ```release-note
+   NONE
+   ```
+   ````
+

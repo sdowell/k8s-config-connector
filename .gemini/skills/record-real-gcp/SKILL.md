@@ -108,11 +108,17 @@ StorageBucket:
     ```
 
 #### 3. Troubleshooting API / Permissions Issues
-*   If an API service is disabled, enable it:
+*   If `hack/record-gcp` fails with a 403 saying the API is disabled (e.g., "API has not been used in project ... before or it is disabled"), this is **not** a permissions blocker. Enable the API in the project used for E2E tests and retry:
     ```bash
-    gcloud services enable <service>.googleapis.com
+    gcloud services enable <service>.googleapis.com --project <gcp-project-id>
     ```
+    Do **NOT** add a `Service` resource to `dependencies.yaml` instead: that is forbidden for E2E fixtures (it breaks unit tests through the pre-enabled check).
 *   If `hack/record-gcp` fails due to test manifest configuration issues (e.g. IP range conflict or schema typo), fix the configuration and retry. If it still fails after 3 distinct retry attempts, pause and summarize the blocker for the human reviewer.
+
+#### 4. PR Reporting (MANDATORY)
+In the PR description, state explicitly whether `hack/record-gcp` ran successfully against real GCP:
+*   If it ran: the GCP project used.
+*   If it didn't (disabled APIs, missing permissions, allowlist-gated services, rate limits, ...): the exact command, the full error message, and the fallback you used to generate or align the HTTP logs.
 
 ---
 

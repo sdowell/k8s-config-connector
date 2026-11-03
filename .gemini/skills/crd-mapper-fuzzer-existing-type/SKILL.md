@@ -10,8 +10,11 @@ This skill outlines standard practices when transitioning an existing KCC resour
 
 ## Workflow
 
+### 0. Check Whether `<Kind>` Already Has Direct Types
+If `<Kind>` already has a `_types.go` under `apis/<service>/<version>/` and a `generate.sh` in its service directory configured for it, **do not open a PR**: comment on the issue that `<Kind>` already has direct types (naming the files), and close the issue as **not planned**. The graph treats that as Skipped and moves on to the next step.
+
 ### 1. Configure generate.sh
-Configure `apis/<service>/generate.sh` to include the resource. 
+Configure `apis/<service>/generate.sh` (or `apis/<service>/<version>/generate.sh` where the service keeps it per version) to include the resource, so that the direct KRM type is strictly schema-compatible with the existing CRD. For setting up `generate.sh`, renaming files/fields to match acronyms, handling pointers, and directory structure, also refer to [`generate-sh-checker`](.gemini/skills/generate-sh-checker/SKILL.md).
 
 * **Types Generation**: Run `generate-types` for each version present under `apis/<service>/` (e.g. `v1alpha1` and `v1beta1`).
 * **Mappers Generation**: Run `generate-mapper` **exactly once** at the very end of the consolidated script (targeting the highest supported version, e.g. `v1beta1`) and **always pass `--multiversion` by default**. Because `generate-mapper` scans the entire service API directory, running it once with `--multiversion` compiles mappers for all versions into `mapper.generated.go` with version suffixes, avoiding duplicate clashes and accidental file overwrites.
@@ -88,3 +91,6 @@ When writing a KRM round-trip fuzzer, or if a fuzzer already exists:
 - Run `dev/tasks/diff-crds --allow-status-external-ref-addition` to verify there are absolutely no unintended schema changes.
 - Since we are transitioning an existing type, the primary acceptance criterion is "does it generate the same CRD schema" (with the expected addition of `status.externalRef`).
 - Once the schema is identical, run `make ready-pr` to regenerate Go clients (and compile-check the changes, run custom linters, format the files, and regenerate static configs).
+
+### 5. Before Opening the PR
+Journal per `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, service-specific notes in `.gemini/journals/<service_name>.md`.

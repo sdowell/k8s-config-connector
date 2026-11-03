@@ -12,6 +12,8 @@ When the golden tests for K8s Config Connector mock output diverge from real GCP
 ## Critical Rules
 
 *   **Real GCP Baseline Required**: You must always have authentic `_http.log` files recorded from real GCP before aligning mock behavior. Please always execute the [`record-real-gcp`](.gemini/skills/record-real-gcp/SKILL.md) skill.
+    - If a fixture has no real-GCP `_http.log` yet, record it with `hack/record-gcp`, and commit the files that `hack/record-gcp` changed **in their own commit**.
+    - Generating golden logs (`_http.log`) from MockGCP (e.g., `E2E_GCP_TARGET=mock` with `WRITE_GOLDEN_OUTPUT=1`) is **strictly forbidden**: it freezes mock-only behavior and bypasses GCP contract validation.
 *   **Basic Test Case Naming**: Ensure that the basic test case directory/folder names always contain the resource kind name (e.g., use `computesubnetwork-reservedinternalrange` instead of `reservedinternalrange`).
 *   **No New Missing Fields**: We should not add new missing fields to the exceptions file (`tests/apichecks/testdata/exceptions/missingfields.txt`). If fixing or renaming an existing test case exposes/causes more missing fields, you must extend the test case configuration or add a new test case (or more than one if needed) to cover those missing fields.
  You MUST first establish a baseline against `real` GCP with `E2E_GCP_TARGET=real E2E_KUBE_TARGET=envtest` with `WRITE_GOLDEN_OUTPUT=1`.
@@ -22,6 +24,12 @@ When the golden tests for K8s Config Connector mock output diverge from real GCP
 *   **Focus on Target CRUD Requests**: When aligning the HTTP logs, we only care about the requests made to the CRUD endpoint of the target resource. Non-target/dependent resource requests in the log do not need to be matched as strictly.
 
 ## Workflow
+
+### Step -1: Make Sure a Mock Exists
+
+Check under `mockgcp/` whether a mock for the GCP service and resource of `<Kind>` already exists. If it doesn't, follow [`add-new-mockgcp-resource`](.gemini/skills/add-new-mockgcp-resource/SKILL.md) to implement it first, then continue below.
+
+---
 
 ### Step 0: Remove from Ratcheting Exclusions (MANDATORY)
 
@@ -99,3 +107,14 @@ Verify that all test directories associated with your target resource are verifi
    ```bash
    go test -v ./pkg/test/resourcefixture -run "TestGoldenLogAlignment/<kind_lowercase>"
    ```
+
+### Step 4: Before Opening the PR
+
+1. If you ran `hack/record-gcp`, document the run in the PR description as described in "PR Reporting" of [`record-real-gcp`](.gemini/skills/record-real-gcp/SKILL.md).
+2. Journal per `.gemini/skills/kcc-agentic-journaler/SKILL.md`: don't edit any `SKILL.md`; general learnings go in a "Workflow feedback" section of the PR description, service-specific notes in `.gemini/journals/<service_name>.md`.
+3. Include the release note block set to NONE in the PR description (MockGCP alignment isn't user-facing):
+   ````
+   ```release-note
+   NONE
+   ```
+   ````

@@ -37,6 +37,9 @@ You **must** also apply the baseline KRM standards in:
 
 ## Workflow
 
+### Phase 0: Check That This Step Applies
+If `apis/<service>/v1alpha1/<kind_lowercase>_types.go` exists in your checkout but `apis/<service>/judgement_queue.yaml` has no `open` `untriaged-bulk-generation` entry for `<Kind>`, `<Kind>` was finalized by a legacy Step 1 PR. Then **don't change anything**: make no commit, and reply that this step doesn't apply (naming the types file). A maintainer will close the issue.
+
 ### Phase 1: Inventory, `generate-mapper` Check, & Proto Discovery
 1. Read `apis/<service>/judgement_queue.yaml` (locating `<Kind>`'s contiguous block), `apis/<service>/generate.sh`, and `apis/<service>/v1alpha1/<kind>_types.go`.
 2. Verify that `apis/<service>/generate.sh` runs in the canonical order:
@@ -72,6 +75,7 @@ You **must** also apply the baseline KRM standards in:
 | `well-known-proto-type` / `sensitive-field` | Leave `status: open` (or mark `status: resolved`, `resolution: deferred` with a note) pending team-wide greenfield conventions. |
 
 ### Phase 3: Holistic Proto-vs-KRM Audit (Before Closing `untriaged-bulk-generation`)
+0. **Child Resources Have Exactly One `spec.parentRef`**: If `<Kind>` is a child of another GCP resource, model its parent as one required, immutable `spec.parentRef`, reusing the parent's existing `<ParentKind>Ref` from wherever it is under `apis/` ([`references/PARENT_AND_IDENTITY.md`](references/PARENT_AND_IDENTITY.md), Case B), even if the queue has no parent entry for `<Kind>`.
 1. **Unflagged Subtle References**: Scan every remaining `*string` / `[]string` field in `<Kind>Spec` and reachable structs in `types.generated.go` for unflagged GCP resource references (e.g., `sourceProjectID`, `defaultDatabase`, `kmsKey`, `serviceAccount`, `network`, `repository`) and convert them to `*Ref` fields.
 2. **Top-Level `Spec.Labels` Removal (`TestVerifyLabelsTestCasesExist`)**: Ensure top-level `Labels map[string]string` is removed from `<Kind>Spec` (top-level proto `labels` are reconciled via `metadata.labels`); leaving `Labels` in `<Kind>Spec` causes `TestVerifyLabelsTestCasesExist` to fail when a controller is registered.
 3. **Nested `Etag` / Output-Only Fields & Empty `ObservedState`**: Check nested Spec structs for unannotated `Etag` or output-only fields; if `<Kind>ObservedState` ends up empty, comment out `ObservedState` in `<Kind>Status` and `type <Kind>ObservedState struct`.
